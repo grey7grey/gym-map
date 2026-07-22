@@ -335,57 +335,68 @@ folium.Marker(
 
 # 有筛选时，地图只显示筛选门店，更聚焦；否则显示全部
 df_markers = df_view if kw else df_geo
+df_markers = df_markers.copy()
 # 把 GCJ02 门店坐标转为 WGS84 再绘制（对齐 OpenStreetMap 瓦片，修正整体东南偏）
 # 函数 gcj02_to_wgs84(lng, lat) 返回 (lng_wgs, lat_wgs)，zip 解包后要按顺序赋给 wlng / wlat
-df_markers = df_markers.copy()
-df_markers["wlng"], df_markers["wlat"] = zip(*df_markers.apply(
-    lambda r: gcj02_to_wgs84(r["lng"], r["lat"]), axis=1))
+# 空 df 时 zip(*[]) 解包不到 2 个值会抛 ValueError，必须显式跳过
+if len(df_markers) > 0:
+    df_markers["wlng"], df_markers["wlat"] = zip(*df_markers.apply(
+        lambda r: gcj02_to_wgs84(r["lng"], r["lat"]), axis=1))
+else:
+    df_markers["wlng"] = []
+    df_markers["wlat"] = []
 
 # 用 MarkerCluster 自动聚类：缩小时多个标记合成一个带数字的大圆点，
 # 放大后逐个散开；Top5 的红圆数字号仍在 cluster 内（放大后能看清）。
-marker_cluster = MarkerCluster(
-    name="门店",
-    show=True,
-    options={
-        "maxClusterRadius": 60,        # 像素：同位置 60px 内聚成一团
-        "disableClusteringAtZoom": 16, # 放到 16 级以上不再聚合，逐个看
-    },
-).add_to(m)
+try:
+    marker_cluster = MarkerCluster(
+        name="门店",
+        show=True,
+        options={
+            "maxClusterRadius": 60,        # 像素：同位置 60px 内聚成一团
+            "disableClusteringAtZoom": 16, # 放到 16 级以上不再聚合，逐个看
+        },
+    ).add_to(m)
 
-# 各门店：Top5 用红色数字徽标高亮，其余用蓝色 i 图标；点击看店名 + 服务 + 地址 + 距离
-def numbered_icon(num: int):
-    html = (
-        f'<div style="background-color:#e74c3c;color:#fff;border-radius:50%;'
-        f'width:28px;height:28px;display:flex;align-items:center;justify-content:center;'
-        f'font-weight:bold;font-size:15px;border:2px solid #fff;'
-        f'box-shadow:0 0 4px rgba(0,0,0,.4);">{num}</div>'
+    # 各门店：Top5 用红色数字徽标高亮，其余用蓝色 i 图标；点击看店名 + 服务 + 地址 + 距离
+    def numbered_icon(num: int):
+        html = (
+            f'<div style="background-color:#e74c3c;color:#fff;border-radius:50%;'
+            f'width:28px;height:28px;display:flex;align-items:center;justify-content:center;'
+            f'font-weight:bold;font-size:15px;border:2px solid #fff;'
+            f'box-shadow:0 0 4px rgba(0,0,0,.4);">{num}</div>'
+        )
+        return folium.DivIcon(html=html, icon_size=(28, 28), icon_anchor=(14, 14))
+
+    for idx, r in df_markers.iterrows():
+        popup_html = (
+            f"<b>{r['name']}</b><br>"
+            f"🛎 服务：{r['service']}<br>"
+            f"📍 地址：{r['address']}<br>"
+            f"📏 距离：{r['distance_km']:.2f} km"
+        )
+        if idx < 5:
+            icon = numbered_icon(idx + 1)
+        else:
+            icon = folium.Icon(color="blue", icon="info-sign")
+        folium.Marker(
+            [r["wlat"], r["wlng"]],
+            popup=folium.Popup(popup_html, max_width=320),
+            tooltip=r["name"],
+            icon=icon,
+        ).add_to(marker_cluster)
+
+    # 有筛选时把地图缩放到筛选范围；空匹配时不调（min/max 对空列表会抛 ValueError）
+    if kw and len(df_markers) > 0:
+        all_lats = list(df_markers["wlat"]) + [cur_lat_wgs]
+        all_lngs = list(df_markers["wlng"]) + [cur_lng_wgs]
+        m.fit_bounds([[min(all_lats), min(all_lngs)], [max(all_lats), max(all_lngs)]])
+except Exception as e:
+    # 任何意外都不要把红色 traceback 露给用户；降级为黄色 warning，技术详情放括号里
+    st.warning(
+        f"⚠️ 地图渲染遇到问题，已忽略门店标记。可尝试刷新或换关键词。\n\n"
+        f"（技术详情：{type(e).__name__}: {e}）"
     )
-    return folium.DivIcon(html=html, icon_size=(28, 28), icon_anchor=(14, 14))
-
-
-for idx, r in df_markers.iterrows():
-    popup_html = (
-        f"<b>{r['name']}</b><br>"
-        f"🛎 服务：{r['service']}<br>"
-        f"📍 地址：{r['address']}<br>"
-        f"📏 距离：{r['distance_km']:.2f} km"
-    )
-    if idx < 5:
-        icon = numbered_icon(idx + 1)
-    else:
-        icon = folium.Icon(color="blue", icon="info-sign")
-    folium.Marker(
-        [r["wlat"], r["wlng"]],
-        popup=folium.Popup(popup_html, max_width=320),
-        tooltip=r["name"],
-        icon=icon,
-    ).add_to(marker_cluster)
-
-# 有筛选时把地图缩放到筛选范围；无筛选时保持 zoom 14 看清家门口
-if kw:
-    all_lats = list(df_markers["wlat"]) + [cur_lat_wgs]
-    all_lngs = list(df_markers["wlng"]) + [cur_lng_wgs]
-    m.fit_bounds([[min(all_lats), min(all_lngs)], [max(all_lats), max(all_lngs)]])
 
 # 用 streamlit 新版 st.iframe 渲染 folium —— 写到本地临时 html，iframe 引用，streamlit 不 diff 内部节点，
 # 避免 streamlit-folium 在筛选/重定位触发重渲染时偶发 React NotFoundError (removeChild)
