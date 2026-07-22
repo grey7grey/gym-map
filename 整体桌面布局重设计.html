@@ -1,0 +1,95 @@
+<style>
+.m1wrap{font-family:var(--font-sans);color:var(--color-text-primary);background:#F6F7F4;border-radius:16px;overflow:hidden;border:0.5px solid var(--color-border-tertiary)}
+.m1top{display:flex;align-items:center;gap:12px;padding:10px 16px;background:#fff;border-bottom:0.5px solid var(--color-border-tertiary)}
+.m1logo{width:30px;height:30px;border-radius:8px;background:#0F6E56;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:14px}
+.m1title{font-weight:500;font-size:15px}
+.m1search{flex:1;max-width:380px;margin:0 8px;display:flex;align-items:center;gap:8px;background:#F1EFE8;border-radius:999px;padding:7px 14px;font-size:13px;color:#888780}
+.m1chip{margin-left:auto;display:flex;align-items:center;gap:6px;background:#E1F5EE;color:#0F6E56;border-radius:999px;padding:6px 12px;font-size:13px}
+.m1body{display:flex;height:480px}
+.m1side{width:252px;background:#fff;border-right:0.5px solid var(--color-border-tertiary);padding:14px;box-sizing:border-box;overflow:hidden}
+.m1sec{font-size:13px;color:var(--color-text-secondary);margin:0 0 8px}
+.m1row{display:flex;gap:8px;margin-bottom:10px}
+.m1btn{flex:1;border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:8px;font-size:13px;text-align:center;background:#fff}
+.m1btn.on{background:#0F6E56;color:#fff;border-color:#0F6E56}
+.m1in{width:100%;border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:8px 10px;font-size:13px;box-sizing:border-box;margin-bottom:8px}
+.m1go{width:100%;background:#0F6E56;color:#fff;border-radius:8px;padding:8px;font-size:13px;text-align:center;margin-bottom:12px}
+.m1chips{display:flex;gap:6px;margin-bottom:12px}
+.m1c{font-size:12px;border:0.5px solid var(--color-border-tertiary);border-radius:999px;padding:5px 10px;color:var(--color-text-secondary)}
+.m1c.on{background:#E1F5EE;color:#0F6E56;border-color:#0F6E56}
+.m1list{display:flex;flex-direction:column;gap:8px}
+.m1item{display:flex;gap:10px;align-items:flex-start;padding:8px;border:0.5px solid var(--color-border-tertiary);border-radius:10px}
+.m1num{width:20px;height:20px;border-radius:50%;background:#0F6E56;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.m1nm{font-size:13px;font-weight:500;line-height:1.3}
+.m1sub{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.m1main{flex:1;padding:14px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box}
+.m1stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.m1metric{background:#fff;border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:10px 12px}
+.m1ml{font-size:13px;color:var(--color-text-secondary)}
+.m1mv{font-size:22px;font-weight:500;margin-top:2px}
+.m1map{flex:1;border:0.5px solid var(--color-border-tertiary);border-radius:12px;overflow:hidden;position:relative;background:#EEF0EC}
+.m1pop{position:absolute;left:18px;bottom:18px;width:210px;background:#fff;border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:12px}
+.m1pl{font-size:13px;font-weight:500}
+.m1pd{font-size:12px;color:var(--color-text-secondary);margin-top:4px;line-height:1.4}
+.m1dist{display:inline-block;margin-top:8px;background:#FAC775;color:#633806;border-radius:6px;padding:2px 8px;font-size:12px}
+</style>
+<div class="m1wrap">
+  <div class="m1top">
+    <div class="m1logo">健</div>
+    <div class="m1title">工会合作健身房地图</div>
+    <div class="m1search">搜索门店名称 / 服务，如「乐刻」「游泳」</div>
+    <div class="m1chip">家 · 德平路25弄</div>
+  </div>
+  <div class="m1body">
+    <div class="m1side">
+      <p class="m1sec">我的位置</p>
+      <div class="m1row">
+        <div class="m1btn on">家</div>
+        <div class="m1btn">公司</div>
+      </div>
+      <input class="m1in" value="或输入临时地址定位" />
+      <div class="m1go">定位这个地址</div>
+      <p class="m1sec">快速筛选</p>
+      <div class="m1chips">
+        <div class="m1c on">24/7</div>
+        <div class="m1c">游泳</div>
+        <div class="m1c">乐刻</div>
+      </div>
+      <p class="m1sec">离我最近</p>
+      <div class="m1list">
+        <div class="m1item"><div class="m1num">1</div><div><div class="m1nm">乐刻运动健身(白玉路升级馆)</div><div class="m1sub">0.42 km · 白玉路101号</div></div></div>
+        <div class="m1item"><div class="m1num">2</div><div><div class="m1nm">乐刻健身(中宁路店)</div><div class="m1sub">0.91 km · 武宁路801号</div></div></div>
+        <div class="m1item"><div class="m1num">3</div><div><div class="m1nm">乐刻运动健身(我格广场店)</div><div class="m1sub">1.13 km · 武宁路101号</div></div></div>
+        <div class="m1item"><div class="m1num">4</div><div><div class="m1nm">乐刻健身(大渡河路店)</div><div class="m1sub">1.27 km · 金沙江路960号</div></div></div>
+        <div class="m1item"><div class="m1num">5</div><div><div class="m1nm">乐刻健身(长风大悦城店)</div><div class="m1sub">1.55 km · 大渡河路196号</div></div></div>
+      </div>
+    </div>
+    <div class="m1main">
+      <div class="m1stats">
+        <div class="m1metric"><div class="m1ml">可用门店</div><div class="m1mv">483 家</div></div>
+        <div class="m1metric"><div class="m1ml">覆盖行政区</div><div class="m1mv">16 个</div></div>
+        <div class="m1metric"><div class="m1ml">距我最近</div><div class="m1mv">0.42 km</div></div>
+      </div>
+      <div class="m1map">
+        <svg width="100%" height="100%" viewBox="0 0 460 360" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0">
+          <rect width="460" height="360" fill="#EEF0EC"/>
+          <line x1="0" y1="120" x2="460" y2="120" stroke="#DDE0DA" stroke-width="10"/>
+          <line x1="0" y1="250" x2="460" y2="250" stroke="#DDE0DA" stroke-width="16"/>
+          <line x1="150" y1="0" x2="150" y2="360" stroke="#DDE0DA" stroke-width="10"/>
+          <line x1="330" y1="0" x2="330" y2="360" stroke="#DDE0DA" stroke-width="14"/>
+          <rect x="175" y="135" width="120" height="85" rx="8" fill="#DCE9DF"/>
+          <circle cx="90" cy="70" r="5" fill="#0F6E56"/><circle cx="120" cy="200" r="5" fill="#0F6E56"/>
+          <circle cx="240" cy="80" r="5" fill="#0F6E56"/><circle cx="270" cy="180" r="5" fill="#0F6E56"/>
+          <circle cx="380" cy="100" r="5" fill="#0F6E56"/><circle cx="400" cy="300" r="5" fill="#0F6E56"/>
+          <circle cx="200" cy="300" r="5" fill="#0F6E56"/><circle cx="60" cy="300" r="5" fill="#0F6E56"/>
+          <circle cx="300" cy="320" r="5" fill="#0F6E56"/><circle cx="150" cy="40" r="5" fill="#0F6E56"/>
+          <g transform="translate(300,210)"><circle r="9" fill="#A32D2D"/><circle r="3.5" fill="#fff"/></g>
+        </svg>
+        <div class="m1pop">
+          <div class="m1pl">乐刻运动健身(白玉路升级馆)</div>
+          <div class="m1pd">白玉路101号2层（曹杨路地铁站2号口步行90米）</div>
+          <span class="m1dist">0.42 km · 营业中</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
