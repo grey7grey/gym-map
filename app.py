@@ -275,7 +275,7 @@ if len(df_view) == 0:
 else:
     for i, r in df_view.head(5).iterrows():
         st.sidebar.markdown(f"**{i + 1}. {r['name']}**")
-        st.sidebar.markdown(f"{r['distance_km']:.2f} 公里 | {r['address']}")
+        st.sidebar.caption(f"📍 {r['distance_km']:.2f} 公里 | {r['address']}")
 
 # ===== 右侧：folium 交互式地图 =====
 # 默认 zoom=14 看清家门口（家附近商圈级），有筛选时再用 fit_bounds 缩到筛选范围
