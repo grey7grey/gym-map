@@ -9,7 +9,7 @@
   5. 右侧用 folium 渲染交互式地图，所有门店大头针可点击查看店名与服务
 
 依赖安装：
-  pip install streamlit pandas openpyxl requests folium streamlit-folium
+  pip install streamlit pandas openpyxl requests folium python-dotenv
 
 运行：
   streamlit run app.py
@@ -201,8 +201,14 @@ st.markdown(
 
 # ===== 侧边栏 =====
 
-# Key 走 .env 自动读取，仅临时外出地址解析时才需要（家/公司坐标已烘焙，无需调用）
-api_key = os.getenv("AMAP_KEY", "")
+# Key：优先读 Streamlit Cloud 的 Secrets（部署环境），本地回退到 .env（load_dotenv 已加载）
+# 仅「临时文字地址」解析时才需要；家/公司坐标已烘焙，无需调用高德
+try:
+    api_key = st.secrets.get("AMAP_KEY", "")
+except Exception:
+    api_key = ""
+if not api_key:
+    api_key = os.getenv("AMAP_KEY", "")
 
 st.sidebar.header("📍 我的位置")
 
@@ -419,10 +425,9 @@ except Exception as e:
         f"（技术详情：{type(e).__name__}: {e}）"
     )
 
-# 用 streamlit 新版 st.iframe 渲染 folium —— 写到本地临时 html，iframe 引用，streamlit 不 diff 内部节点，
-# 避免 streamlit-folium 在筛选/重定位触发重渲染时偶发 React NotFoundError (removeChild)
-# 代价：不能像 st_folium 那样把点击坐标回传 streamlit（本应用未用到，无影响）
-_map_cache = os.path.join(os.path.dirname(__file__), ".cache", "map.html")
-os.makedirs(os.path.dirname(_map_cache), exist_ok=True)
-m.save(_map_cache)
-st.iframe(_map_cache, height=620)
+# 用 streamlit components 内嵌渲染 folium 的 HTML 字符串（非本地文件路径）。
+# 这样在 Streamlit Cloud 上也能正常显示——云端无法把本地文件路径当作 iframe 的可访问 URL 来解析，
+# 而内嵌 HTML 字符串会随页面返回，任何环境都生效；同时沿用 iframe 内嵌方式，
+# 避免 st_folium 在筛选/重定位时偶发 React NotFoundError (removeChild)。
+# 代价：不能像 st_folium 那样把点击坐标回传 streamlit（本应用未用到，无影响）。
+st.components.v1.html(m.get_root().render(), height=620)

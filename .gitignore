@@ -1,9 +1,27 @@
 # ===== 密钥（绝不提交）=====
 .env
+.env.*
+!.env.example
+.streamlit/secrets.toml
 
-# ===== Python 缓存 =====
+# ===== Python 虚拟环境（绝不提交）=====
+venv/
+env/
+ENV/
+.venv/
+.conda/
+.Python
+
+# ===== Python 缓存 / 构建产物 =====
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
 
 # ===== 运行时日志 =====
 .run.log
@@ -13,7 +31,7 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# ===== 本地缓存 =====
+# ===== 本地缓存 / 临时文件 =====
 .lecke_raw.json
 .cache/
 

@@ -22,6 +22,7 @@
 ├── geocode_once.py             # 一次性把 Excel 地址解析为坐标，生成 store_coords.py
 ├── run_geocode.bat             #  Windows 下一键跑 geocode_once.py
 ├── .env.example                # 高德 Key 模板（复制为 .env 后填真实 Key）
+├── requirements.txt            # 云端部署依赖清单（Streamlit Cloud 自动安装）
 ├── .gitignore                  # 排除 .env / .workbuddy / 缓存等
 └── README.md
 ```
@@ -83,6 +84,52 @@ cp .env.example .env
 - **地图/搜索/Top5 不显示门店？** 多半是旧的 streamlit 进程堆积导致缓存未刷新。杀掉 8501 端口上的旧进程后重新 `streamlit run` 即可。
 - **只想改门店数据？** 编辑 `公司工会合作健身房列表.xlsx`，再跑一遍 `geocode_once.py` 重新生成 `store_coords.py`（会调用高德解析新地址，需要有效的 `AMAP_KEY`）。
 - **家/公司地址换了？** 直接改 `app.py` 顶部的 `HOME_ADDR` / `HOME_COORD` 与 `WORK_ADDR` / `WORK_COORD` 常量即可（当前为固定值，已烘焙，启动不再联网获取）。
+
+## 部署到 Streamlit Community Cloud（公网访问）
+
+把应用发布成一个任何人都能打开的公网网址。以下流程假设你已经有一个 GitHub 账号。
+
+### 1. 准备（本地，本项目已完成）
+
+- `app.py` 在仓库根目录（Streamlit Cloud 默认入口，无需额外配置）。
+- `requirements.txt` 已就绪，云端会自动安装依赖。
+- 坐标已烘焙进 `store_coords.py`，**云端启动即显示门店，无需任何网络调用**。
+- `.env` / `.cache/` / 虚拟环境 已被 `.gitignore` 排除，不会上传。
+
+### 2. 初始化并提交 Git（若还没做）
+
+```bash
+cd "D:\ai空间\健身房"
+git init            # 本项目已执行过，可跳过
+git add .
+git commit -m "健身房地图应用"
+```
+
+### 3. 推送到 GitHub
+
+1. 在 GitHub 上新建一个**公开（Public）**仓库（例如 `gym-map`），**不要**勾选自动生成 README / .gitignore。
+2. 本地关联并推送：
+
+```bash
+git remote add origin https://github.com/你的用户名/gym-map.git
+git branch -M main
+git push -u origin main
+```
+
+> 推送前可用 `git status` 确认没有把 `.env` 提交进去（被 `.gitignore` 排除就不会出现）。
+
+### 4. 在 Streamlit Cloud 部署
+
+1. 打开 https://share.streamlit.io/ ，用 **GitHub 账号登录**（授权一次）。
+2. 点 **New app** → 选择刚推送的仓库 `gym-map`、分支 `main`、入口文件 `app.py` → **Deploy**。
+3. 在部署设置里填入 **AMAP_KEY**（在 app 的 **Settings → Secrets** 面板，粘贴 TOML 格式）：
+   ```toml
+   AMAP_KEY = "你的高德Web服务Key"
+   ```
+   应用代码读取顺序：优先 `st.secrets["AMAP_KEY"]`（云端），本地则回退到 `.env`。**不要把 Key 写进代码或提交到 Git。**
+4. 部署完成后，Streamlit Cloud 会给出一个形如 `https://xxxx.streamlit.app` 的公网网址，分享即可。
+
+> 注意：Streamlit Cloud 默认运行在海外节点。高德地理编码 API 是公网 HTTPS，可正常访问；门店坐标已烘焙，地图本身不依赖网络。
 
 ## 版本控制
 

@@ -1,0 +1,8 @@
+# Streamlit Community Cloud 部署依赖（版本已与本机 venv 对齐）
+streamlit==1.60.0
+pandas==3.0.3
+openpyxl==3.1.5
+requests==2.34.2
+folium==0.20.0
+python-dotenv==1.2.2
+numpy==2.5.1
