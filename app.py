@@ -178,8 +178,26 @@ def haversine(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
 # ---------------- 页面 ----------------
 st.set_page_config(page_title="工会合作健身房地图", layout="wide")
 
-# 告知浏览器（Chrome 等）页面已是中文，抑制自动翻译把"门店"误翻成"车站"
-st.markdown('<meta name="google" content="notranslate">', unsafe_allow_html=True)
+# 抑制 Chrome 自动翻译把"门店"误翻成"车站"：
+# body 里的 <meta> Chrome 不认，必须在 <head> 且由 <html lang> 决定页面语言。
+# 用同步 <script> 在页面解析早期把 <html lang> 设为 zh-CN + 在 head 注入 notranslate meta，
+# 让 Chrome 在决定翻译前就识别本页为中文、不触发翻译。
+st.markdown(
+    """
+    <script>
+    (function () {
+        document.documentElement.lang = "zh-CN";
+        if (!document.querySelector('meta[name="google"]')) {
+            var m = document.createElement("meta");
+            m.name = "google";
+            m.content = "notranslate";
+            document.head.appendChild(m);
+        }
+    })();
+    </script>
+    """,
+    unsafe_allow_html=True,
+)
 
 # ===== 侧边栏 =====
 
