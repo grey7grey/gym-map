@@ -31,6 +31,50 @@ from dotenv import load_dotenv
 
 load_dotenv()  # 读取同目录 .env 里的 AMAP_KEY（不上 Git）
 
+
+# ---------------- 坐标系转换 ----------------
+def gcj02_to_wgs84(lng: float, lat: float):
+    """高德 GCJ02（火星坐标）→ WGS84（OpenStreetMap 瓦片坐标系）。
+
+    门店坐标 / 家 / 公司 / 临时地址均来自高德地理编码，皆为 GCJ02；
+    而 folium 默认瓦片是 WGS84，绘制前必须转换，否则所有标记会整体向东南偏移。
+    这里用一次反馈迭代做近似逆变换，误差 < 1m 级，足以用于地图显示。
+    """
+    a = 6378245.0
+    ee = 0.00669342162296594323
+
+    def _t_lat(x, y):
+        ret = (-100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y
+               + 0.2 * math.sqrt(abs(x)))
+        ret += (20.0 * math.sin(6.0 * x * math.pi) + 20.0 * math.sin(2.0 * x * math.pi)) * 2.0 / 3.0
+        ret += (20.0 * math.sin(y * math.pi) + 40.0 * math.sin(y / 3.0 * math.pi)) * 2.0 / 3.0
+        ret += (160.0 * math.sin(y / 12.0 * math.pi) + 320 * math.sin(y * math.pi / 30.0)) * 2.0 / 3.0
+        return ret
+
+    def _t_lng(x, y):
+        ret = (300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y
+               + 0.1 * math.sqrt(abs(x)))
+        ret += (20.0 * math.sin(6.0 * x * math.pi) + 20.0 * math.sin(2.0 * x * math.pi)) * 2.0 / 3.0
+        ret += (20.0 * math.sin(x * math.pi) + 40.0 * math.sin(x / 3.0 * math.pi)) * 2.0 / 3.0
+        ret += (150.0 * math.sin(x / 12.0 * math.pi) + 300.0 * math.sin(x / 30.0 * math.pi)) * 2.0 / 3.0
+        return ret
+
+    if not (73.66 < lng < 135.05 and 3.86 < lat < 53.55):
+        return lng, lat  # 境外不转换
+    dlat = _t_lat(lng - 105.0, lat - 35.0)
+    dlng = _t_lng(lng - 105.0, lat - 35.0)
+    radlat = lat / 180.0 * math.pi
+    magic = math.sin(radlat)
+    magic = 1 - ee * magic * magic
+    sqrtmagic = math.sqrt(magic)
+    dlat = (dlat * 180.0) / ((a * (1 - ee)) / (magic * sqrtmagic) * math.pi)
+    dlng = (dlng * 180.0) / (a / sqrtmagic * math.cos(radlat) * math.pi)
+    mglat = lat + dlat
+    mglng = lng + dlng
+    # 逆变换近似：WGS84 = GCJ02 - (GCJ02 - WGS84)
+    return lng - (mglng - lng), lat - (mglat - lat)
+
+
 # ---------------- 配置 ----------------
 # 脚本与 xlsx 放在同一目录，自动定位表格
 EXCEL_PATH = os.path.join(os.path.dirname(__file__), "公司工会合作健身房列表.xlsx")
@@ -278,18 +322,24 @@ else:
         st.sidebar.caption(f"📍 {r['distance_km']:.2f} 公里 | {r['address']}")
 
 # ===== 右侧：folium 交互式地图 =====
+# 注意：高德坐标(GCJ02)需转 WGS84 才能对齐 OpenStreetMap 瓦片，否则整体向东南偏
+cur_lng_wgs, cur_lat_wgs = gcj02_to_wgs84(cur_lng, cur_lat)
 # 默认 zoom=14 看清家门口（家附近商圈级），有筛选时再用 fit_bounds 缩到筛选范围
-m = folium.Map(location=[cur_lat, cur_lng], zoom_start=14)
+m = folium.Map(location=[cur_lat_wgs, cur_lng_wgs], zoom_start=14)
 
 # 我的位置（红色大头针，独立于 cluster，置顶）
 folium.Marker(
-    [cur_lat, cur_lng],
+    [cur_lat_wgs, cur_lng_wgs],
     tooltip="我的位置",
     icon=folium.Icon(color="red", icon="home"),
 ).add_to(m)
 
 # 有筛选时，地图只显示筛选门店，更聚焦；否则显示全部
 df_markers = df_view if kw else df_geo
+# 把 GCJ02 门店坐标转为 WGS84 再绘制（对齐 OpenStreetMap 瓦片，修正整体东南偏）
+df_markers = df_markers.copy()
+df_markers["wlat"], df_markers["wlng"] = zip(*df_markers.apply(
+    lambda r: gcj02_to_wgs84(r["lng"], r["lat"]), axis=1))
 
 # 用 MarkerCluster 自动聚类：缩小时多个标记合成一个带数字的大圆点，
 # 放大后逐个散开；Top5 的红圆数字号仍在 cluster 内（放大后能看清）。
@@ -325,7 +375,7 @@ for idx, r in df_markers.iterrows():
     else:
         icon = folium.Icon(color="blue", icon="info-sign")
     folium.Marker(
-        [r["lat"], r["lng"]],
+        [r["wlat"], r["wlng"]],
         popup=folium.Popup(popup_html, max_width=320),
         tooltip=r["name"],
         icon=icon,
@@ -333,8 +383,8 @@ for idx, r in df_markers.iterrows():
 
 # 有筛选时把地图缩放到筛选范围；无筛选时保持 zoom 14 看清家门口
 if kw:
-    all_lats = list(df_markers["lat"]) + [cur_lat]
-    all_lngs = list(df_markers["lng"]) + [cur_lng]
+    all_lats = list(df_markers["wlat"]) + [cur_lat_wgs]
+    all_lngs = list(df_markers["wlng"]) + [cur_lng_wgs]
     m.fit_bounds([[min(all_lats), min(all_lngs)], [max(all_lats), max(all_lngs)]])
 
 st_folium(m, width=900, height=620)
