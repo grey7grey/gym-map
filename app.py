@@ -267,7 +267,7 @@ qc1, qc2 = st.sidebar.columns(2)
 qc1.button("⚡ 24/7", key="q_24", use_container_width=True, on_click=_set_kw, args=("24/7",))
 qc2.button("⚡ 游泳", key="q_swim", use_container_width=True, on_click=_set_kw, args=("游泳",))
 
-st.sidebar.subheader("🏆 离我最近的前 5 名")
+st.sidebar.subheader("🏆 前 5 名")
 if kw:
     st.sidebar.caption(f"筛选「{kw}」：命中 **{len(df_view)}** 家")
 if len(df_view) == 0:
