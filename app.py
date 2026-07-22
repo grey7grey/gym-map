@@ -178,6 +178,9 @@ def haversine(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
 # ---------------- 页面 ----------------
 st.set_page_config(page_title="工会合作健身房地图", layout="wide")
 
+# 告知浏览器（Chrome 等）页面已是中文，抑制自动翻译把"门店"误翻成"车站"
+st.markdown('<meta name="google" content="notranslate">', unsafe_allow_html=True)
+
 # ===== 侧边栏 =====
 
 # Key 走 .env 自动读取，仅临时外出地址解析时才需要（家/公司坐标已烘焙，无需调用）
