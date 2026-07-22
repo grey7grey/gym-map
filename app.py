@@ -136,7 +136,7 @@ def haversine(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
 st.set_page_config(page_title="工会合作健身房地图", layout="wide")
 
 # ===== 侧边栏 =====
-st.sidebar.title("⚙️ 设置")
+st.sidebar.title("位置")
 
 # Key 走 .env 自动读取，仅临时外出地址解析时才需要（家/公司坐标已烘焙，无需调用）
 api_key = os.getenv("AMAP_KEY", "")
@@ -153,7 +153,6 @@ if c2.button("🏢 公司", use_container_width=True, help=WORK_ADDR):
     st.rerun()
 
 # 临时位置：外出不在家/公司时，手动输入文字地址并点「定位」转成坐标（才调用高德）
-st.sidebar.divider()
 st.sidebar.markdown("**或临时输入一个地址**")
 tmp_addr = st.sidebar.text_input(
     "临时地址",
@@ -175,6 +174,24 @@ if st.sidebar.button("🔍 定位这个地址", key="addr_btn", use_container_wi
             st.rerun()
         else:
             st.sidebar.error("地址解析失败，请写得更具体些（带区 / 路 / 号）。")
+
+# ===== 侧边栏：筛选大标题 + 搜索框 + 快捷关键词 =====
+st.sidebar.header("🔍 筛选")
+search_kw = st.sidebar.text_input(
+    "搜索门店",
+    key="search_kw",
+    placeholder="🔍 搜索（名称 / 服务，留空显示全部）",
+    help="同时匹配「门店名称」和「提供服务」两列，留空则显示全部。",
+    label_visibility="collapsed",
+)
+def _set_kw(val: str):
+    # 回调在 widget 实例化前运行，可安全写入 session_state
+    st.session_state.search_kw = val
+
+
+qc1, qc2 = st.sidebar.columns(2)
+qc1.button("⚡ 24/7", key="q_24", use_container_width=True, on_click=_set_kw, args=("24/7",))
+qc2.button("⚡ 游泳", key="q_swim", use_container_width=True, on_click=_set_kw, args=("游泳",))
 
 # ===== 主界面 =====
 st.title("🏋️ 工会合作健身房地图")
@@ -250,23 +267,7 @@ if kw:
 if kw:
     st.info(f"🔎 正在筛选「{kw}」，共 **{len(df_view)}** 家匹配，已按距当前位置由近到远排序。")
 
-# ===== 侧边栏：搜索筛选 + 离我最近的 Top 5 =====
-search_kw = st.sidebar.text_input(
-    "搜索门店",
-    key="search_kw",
-    placeholder="🔍 搜索（名称 / 服务，留空显示全部）",
-    help="同时匹配「门店名称」和「提供服务」两列，留空则显示全部。",
-    label_visibility="collapsed",
-)
-def _set_kw(val: str):
-    # 回调在 widget 实例化前运行，可安全写入 session_state
-    st.session_state.search_kw = val
-
-
-qc1, qc2 = st.sidebar.columns(2)
-qc1.button("⚡ 24/7", key="q_24", use_container_width=True, on_click=_set_kw, args=("24/7",))
-qc2.button("⚡ 游泳", key="q_swim", use_container_width=True, on_click=_set_kw, args=("游泳",))
-
+# ===== 侧边栏：离我最近的 Top 5 =====
 st.sidebar.subheader("🏆 前 5 名")
 if kw:
     st.sidebar.caption(f"筛选「{kw}」：命中 **{len(df_view)}** 家")
