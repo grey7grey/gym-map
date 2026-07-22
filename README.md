@@ -28,27 +28,55 @@
 
 ## 环境准备
 
-需要 Python 3.10+，依赖：
+需要 Python 3.10+。本项目配套的 Python 已经装好，并且 **`streamlit` 命令已经加进你的用户级 PATH**——所以平常直接输入 `streamlit` 就能用，不用写一长串路径。
+
+如果你在别的电脑 / 终端里输入 `streamlit` 提示「不是内部或外部命令」，说明那台机器没配，可选下面任一方式：
+- 用全路径调用：`C:\Users\prote\.workbuddy\binaries\python\envs\default\Scripts\python.exe -m streamlit run app.py --server.port 8501`
+- 或自行安装依赖：`pip install streamlit pandas openpyxl requests folium streamlit-folium python-dotenv`
+
+## 配置高德 Key（可选）
+
+只有当你想用「临时文字地址」定位时才需要 Key；门店坐标已烘焙，**不配置也能正常看地图 / 搜索 / TOP5**。
 
 ```bash
-pip install streamlit pandas openpyxl requests folium streamlit-folium python-dotenv
-```
-
-## 运行
-
-```bash
-# 1. 配置高德 Key（仅「临时文字地址」定位需要；门店坐标已烘焙，不配也能跑地图/搜索/Top5）
 cp .env.example .env
-#   然后编辑 .env，把 AMAP_KEY 改成你的高德 Web 服务 Key
-#   申请地址：https://lbs.amap.com/
-
-# 2. 启动
-streamlit run app.py --server.port 8501
+# 然后用记事本打开 .env，把 AMAP_KEY 改成你的高德 Web 服务 Key
+# 申请地址：https://lbs.amap.com/
 ```
 
-浏览器打开 http://localhost:8501 即可。
+## 怎么打开这个网页（日常）
 
-> 默认开页定位 = 家。改完 `store_coords.py` / Excel 后按 F5 即生效（应用每次刷新动态重载坐标文件，无需手动重启进程）。
+应用地址固定为 **http://localhost:8501**，不会变。
+
+- **服务正在运行时**：直接打开浏览器，输入上面的地址即可。服务在后台运行，关掉命令行窗口也不会停。
+- **打不开（多半是电脑重启过、服务已停止）**：按下面「启动 / 重启服务」操作。
+
+## 启动 / 重启服务（一步一步来，适合零基础）
+
+1. 打开命令提示符：按键盘 `Win + R`，输入 `cmd`，回车。会弹出一个黑色窗口（这就是「命令行」）。
+2. 进入项目目录：在黑窗口里**粘贴**下面这行，按回车：
+   ```
+   cd /d "D:\ai空间\健身房"
+   ```
+3. 启动应用：再**粘贴**下面这行，按回车：
+   ```
+   streamlit run app.py --server.port 8501
+   ```
+4. 看到 `You can view your Streamlit app in your browser.` 和 `Local URL: http://localhost:8501` 就成功了。
+5. 打开浏览器，访问 http://localhost:8501 。
+6. **保持这个黑色窗口开着**（可以最小化，但不要关闭）。关掉它，服务就停了。
+
+> 如果第 3 步提示「端口 8501 被占用」，说明旧的服务还在跑——不用再起一个，直接刷新浏览器 http://localhost:8501 即可。
+
+## 验证全局命令是否生效
+
+新开一个 cmd，输入 `streamlit --version`，能显示版本号（例如 `Streamlit, version 1.x.x`）就说明全局 `streamlit` 命令已配置好。
+
+> 默认开页定位 = 家。改完 `store_coords.py` / Excel 后按 **F5** 即生效（应用每次刷新会动态重载坐标文件，无需手动重启进程）。
+
+## 为什么命令变短了
+
+本项目用的 Python 装在隔离环境（C 盘的 WorkBuddy 目录），原本必须写一长串完整路径才能调用。现在已经把 `streamlit` 加进你的用户 PATH，所以新开的命令行里直接输入 `streamlit` 就能用，不用再写长路径。
 
 ## 常见问题
 
