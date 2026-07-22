@@ -15,6 +15,7 @@ Thumbs.db
 
 # ===== 本地缓存 =====
 .lecke_raw.json
+.cache/
 
 # ===== WorkBuddy 工作区（项目记忆/技能，独立维护）=====
 .workbuddy/

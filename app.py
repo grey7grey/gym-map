@@ -26,7 +26,6 @@ import requests
 import streamlit as st
 import folium
 from folium.plugins import MarkerCluster
-from streamlit_folium import st_folium
 from dotenv import load_dotenv
 
 load_dotenv()  # 读取同目录 .env 里的 AMAP_KEY（不上 Git）
@@ -388,4 +387,10 @@ if kw:
     all_lngs = list(df_markers["wlng"]) + [cur_lng_wgs]
     m.fit_bounds([[min(all_lats), min(all_lngs)], [max(all_lats), max(all_lngs)]])
 
-st_folium(m, width=900, height=620)
+# 用 streamlit 新版 st.iframe 渲染 folium —— 写到本地临时 html，iframe 引用，streamlit 不 diff 内部节点，
+# 避免 streamlit-folium 在筛选/重定位触发重渲染时偶发 React NotFoundError (removeChild)
+# 代价：不能像 st_folium 那样把点击坐标回传 streamlit（本应用未用到，无影响）
+_map_cache = os.path.join(os.path.dirname(__file__), ".cache", "map.html")
+os.makedirs(os.path.dirname(_map_cache), exist_ok=True)
+m.save(_map_cache)
+st.iframe(_map_cache, height=620)
