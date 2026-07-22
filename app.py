@@ -337,8 +337,9 @@ folium.Marker(
 # 有筛选时，地图只显示筛选门店，更聚焦；否则显示全部
 df_markers = df_view if kw else df_geo
 # 把 GCJ02 门店坐标转为 WGS84 再绘制（对齐 OpenStreetMap 瓦片，修正整体东南偏）
+# 函数 gcj02_to_wgs84(lng, lat) 返回 (lng_wgs, lat_wgs)，zip 解包后要按顺序赋给 wlng / wlat
 df_markers = df_markers.copy()
-df_markers["wlat"], df_markers["wlng"] = zip(*df_markers.apply(
+df_markers["wlng"], df_markers["wlat"] = zip(*df_markers.apply(
     lambda r: gcj02_to_wgs84(r["lng"], r["lat"]), axis=1))
 
 # 用 MarkerCluster 自动聚类：缩小时多个标记合成一个带数字的大圆点，
