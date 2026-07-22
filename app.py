@@ -136,7 +136,6 @@ def haversine(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
 st.set_page_config(page_title="工会合作健身房地图", layout="wide")
 
 # ===== 侧边栏 =====
-st.sidebar.title("位置")
 
 # Key 走 .env 自动读取，仅临时外出地址解析时才需要（家/公司坐标已烘焙，无需调用）
 api_key = os.getenv("AMAP_KEY", "")
