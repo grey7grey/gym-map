@@ -140,7 +140,7 @@ st.set_page_config(page_title="工会合作健身房地图", layout="wide")
 # Key 走 .env 自动读取，仅临时外出地址解析时才需要（家/公司坐标已烘焙，无需调用）
 api_key = os.getenv("AMAP_KEY", "")
 
-st.sidebar.subheader("📍 我的位置")
+st.sidebar.header("📍 我的位置")
 
 # 家/公司坐标已烘焙，直接写入 session_state，启动零网络调用
 c1, c2 = st.sidebar.columns(2)
@@ -267,7 +267,7 @@ if kw:
     st.info(f"🔎 正在筛选「{kw}」，共 **{len(df_view)}** 家匹配，已按距当前位置由近到远排序。")
 
 # ===== 侧边栏：离我最近的 Top 5 =====
-st.sidebar.subheader("🏆 前 5 名")
+st.sidebar.header("🏆 离我最近TOP5")
 if kw:
     st.sidebar.caption(f"筛选「{kw}」：命中 **{len(df_view)}** 家")
 if len(df_view) == 0:
