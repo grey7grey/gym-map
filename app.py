@@ -209,6 +209,13 @@ st.markdown(
     header { display: none; }
     footer { display: none; }
 
+    /* 缩减页面默认留白：Streamlit 默认 padding-top 高达 6rem，浪费顶部空间；
+       改成 1.5rem 让标题/指标板上移，给下方地图腾出位置，尽量一屏展示 */
+    .block-container {
+        padding-top: 1.5rem;
+        padding-bottom: 1rem;
+    }
+
     .stButton > button {
         border-radius: 8px;
         transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -216,6 +223,26 @@ st.markdown(
     .stButton > button:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* 核心指标卡片化美化：把 st.metric 从裸文字变成有立体感的白卡片 */
+    div[data-testid="stMetric"] {
+        background-color: #ffffff;
+        border: 1px solid #e0e6ed;
+        border-radius: 12px;
+        padding: 15px 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        transition: all 0.3s ease;
+    }
+    div[data-testid="stMetric"]:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+        border-color: #1f77b4;
+    }
+    /* 强调指标数值颜色，与主题蓝呼应 */
+    div[data-testid="stMetricValue"] {
+        color: #1f77b4;
+        font-weight: 700;
     }
     </style>
     """,
@@ -482,4 +509,4 @@ except Exception as e:
 # 而内嵌 HTML 字符串会随页面返回，任何环境都生效；同时沿用 iframe 内嵌方式，
 # 避免 st_folium 在筛选/重定位时偶发 React NotFoundError (removeChild)。
 # 代价：不能像 st_folium 那样把点击坐标回传 streamlit（本应用未用到，无影响）。
-st.components.v1.html(m.get_root().render(), height=620)
+st.components.v1.html(m.get_root().render(), height=500)
