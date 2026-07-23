@@ -351,15 +351,35 @@ else:
 # 注意：高德坐标(GCJ02)需转 WGS84 才能对齐 OpenStreetMap 瓦片，否则整体向东南偏
 cur_lng_wgs, cur_lat_wgs = gcj02_to_wgs84(cur_lng, cur_lat)
 # 默认 zoom=14 看清家门口（家附近商圈级），有筛选时再用 fit_bounds 缩到筛选范围
-# 瓦片源用高德而非默认 OSM：桌面端 OK，但手机/微信浏览器里 OSM 瓦片常被拦或丢包，
-# 导致「点都在但地图是灰底」。高德瓦片在国内移动场景下稳定且免费。
+# 瓦片源：主用 CartoDB Voyager（带 CORS、keyless、iOS Safari/微信内置浏览器友好），
+# 高德和 OSM 作为可切换的备选 layer。
+# 历史踩坑：
+# 1) 默认 OSM 瓦片在移动端经常被拦/丢包 → 「点都在但地图是灰底」
+# 2) 高德瓦片（webrd0.is.autonavi.com）不发 CORS 头，iOS Safari 内嵌 iframe 加载时被拦截
+# 3) CartoDB 的 basemaps.cartocdn.com 发 CORS 头，全球稳定，是移动端最稳的免费瓦片
 m = folium.Map(
     location=[cur_lat_wgs, cur_lng_wgs],
     zoom_start=14,
+    tiles="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+    attr="© OpenStreetMap contributors © CARTO",
+    subdomains="abcd",
+    max_zoom=19,
+)
+# 备选 layer：用户右上角可手动切换
+folium.TileLayer(
+    tiles="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attr="© OpenStreetMap contributors",
+    name="OSM 标准",
+    max_zoom=19,
+).add_to(m)
+folium.TileLayer(
     tiles="https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
     attr="© 高德地图",
+    name="高德矢量",
     subdomains="1234",
-)
+    max_zoom=18,
+).add_to(m)
+folium.LayerControl(position="topright", collapsed=False).add_to(m)
 
 # 我的位置（红色大头针，独立于 cluster，置顶）
 folium.Marker(
