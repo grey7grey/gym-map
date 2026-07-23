@@ -199,6 +199,29 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# 全局 UI 美化：隐藏冗余元素 + 按钮圆角/悬停微交互（仪表盘质感）
+# 说明：#MainMenu=右上角汉堡菜单、header=顶部栏、footer=底部「Made with Streamlit」，
+# 三者对普通用户无用，隐藏后界面更干净；按钮加圆角 + 悬停上浮 + 阴影，质感更接近设计过的产品。
+st.markdown(
+    """
+    <style>
+    #MainMenu { display: none; }
+    header { display: none; }
+    footer { display: none; }
+
+    .stButton > button {
+        border-radius: 8px;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 # ===== 侧边栏 =====
 
 # Key：优先读 Streamlit Cloud 的 Secrets（部署环境），本地回退到 .env（load_dotenv 已加载）
@@ -267,7 +290,6 @@ st.title("🏋️ GYM MAP")
 st.caption("读取门店列表 → 高德地理编码 → 计算直线距离 → 交互式地图")
 
 df = load_data(EXCEL_PATH)
-st.write(f"可用门店：**{len(df)}** 家")
 
 # 当前位置统一从 session_state 读取（地址按钮 / GPS / 手动输入都写回这里）
 cur_lat = st.session_state.cur_lat
@@ -346,6 +368,27 @@ else:
     for i, r in df_view.head(5).iterrows():
         st.sidebar.markdown(f"**{i + 1}. {r['name']}**")
         st.sidebar.caption(f"📍 {r['distance_km']:.2f} 公里 | {r['address']}")
+
+# ===== 顶部数据看板（仪表盘质感）=====
+# 判断当前作为距离计算基准的位置：与烘焙的家/公司坐标比对，否则视为临时定位
+if (cur_lat, cur_lng) == HOME_COORD:
+    ref_label = "🏠 家"
+elif (cur_lat, cur_lng) == WORK_COORD:
+    ref_label = "🏢 公司"
+else:
+    ref_label = "📍 临时定位"
+
+# 附近 3 公里内门店数（空表时安全置 0）
+near_3km = int((df_view["distance_km"] <= 3).sum()) if len(df_view) else 0
+# 最近门店距离（空表时显示 —）
+nearest_km = df_view["distance_km"].min() if len(df_view) else None
+
+m1, m2, m3, m4 = st.columns(4)
+m1.metric("当前参考位置", ref_label)
+m2.metric("当前展示门店", f"{len(df_view)} 家")
+m3.metric("附近 3 公里内", f"{near_3km} 家")
+m4.metric("最近门店距离", f"{nearest_km:.2f} km" if nearest_km is not None else "—")
+st.markdown("---")
 
 # ===== 右侧：folium 交互式地图 =====
 # 注意：高德坐标(GCJ02)需转 WGS84 才能对齐 OpenStreetMap 瓦片，否则整体向东南偏
