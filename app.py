@@ -1,5 +1,5 @@
 """
-工会合作健身房地图 — Streamlit + 高德地图 API + folium
+GYM MAP — Streamlit + 高德地图 API + folium
 
 功能：
   1. 读取 xlsx 门店列表（门店名称 / 服务 / 详细地址）
@@ -176,7 +176,7 @@ def haversine(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
 
 
 # ---------------- 页面 ----------------
-st.set_page_config(page_title="工会合作健身房地图", layout="wide")
+st.set_page_config(page_title="GYM MAP", layout="wide")
 
 # 抑制 Chrome 自动翻译把"门店"误翻成"车站"：
 # body 里的 <meta> Chrome 不认，必须在 <head> 且由 <html lang> 决定页面语言。
@@ -263,7 +263,7 @@ qc1.button("⚡ 24/7", key="q_24", use_container_width=True, on_click=_set_kw, a
 qc2.button("⚡ 游泳", key="q_swim", use_container_width=True, on_click=_set_kw, args=("游泳",))
 
 # ===== 主界面 =====
-st.title("🏋️ 工会合作健身房地图")
+st.title("🏋️ GYM MAP")
 st.caption("读取门店列表 → 高德地理编码 → 计算直线距离 → 交互式地图")
 
 df = load_data(EXCEL_PATH)
