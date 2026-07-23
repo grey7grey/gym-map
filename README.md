@@ -17,11 +17,10 @@
 ```
 .
 ├── app.py                      # 主应用（Streamlit 入口）
-├── store_coords.py             # 烘焙的门店坐标（295 家，由 tools/geocode_once.py 生成）
+├── store_coords.py             # 烘焙的门店坐标（295 家，由 tools/tools/geocode_once.py 生成）
 ├── 公司工会合作健身房列表.xlsx  # 唯一数据源（门店 / 服务 / 地址）
 ├── tools/                      # 维护工具（平时不用，仅更新门店数据重解析坐标时用）
-│   ├── geocode_once.py         # 一次性把 Excel 地址解析为坐标，生成 store_coords.py
-│   └── run_geocode.bat         # Windows 一键跑 geocode_once.py
+│   ├── tools/geocode_once.py         # 一次性把 Excel 地址解析为坐标，生成 store_coords.py
 ├── .env.example                # 高德 Key 模板（复制为 .env 后填真实 Key）
 ├── requirements.txt            # 云端部署依赖清单（Streamlit Cloud 自动安装）
 ├── .gitignore                  # 排除 .env / .workbuddy / 缓存等
@@ -83,7 +82,7 @@ cp .env.example .env
 ## 常见问题
 
 - **地图/搜索/Top5 不显示门店？** 多半是旧的 streamlit 进程堆积导致缓存未刷新。杀掉 8501 端口上的旧进程后重新 `streamlit run` 即可。
-- **只想改门店数据？** 编辑 `公司工会合作健身房列表.xlsx`，再跑一遍 `tools/geocode_once.py` 重新生成 `store_coords.py`（会调用高德解析新地址，需要有效的 `AMAP_KEY`）。
+- **只想改门店数据？** 编辑 `公司工会合作健身房列表.xlsx`，再跑一遍 `tools/tools/geocode_once.py` 重新生成 `store_coords.py`（会调用高德解析新地址，需要有效的 `AMAP_KEY`）。
 - **家/公司地址换了？** 直接改 `app.py` 顶部的 `HOME_ADDR` / `HOME_COORD` 与 `WORK_ADDR` / `WORK_COORD` 常量即可（当前为固定值，已烘焙，启动不再联网获取）。
 
 ## 部署到 Streamlit Community Cloud（公网访问）
