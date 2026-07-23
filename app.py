@@ -351,7 +351,15 @@ else:
 # 注意：高德坐标(GCJ02)需转 WGS84 才能对齐 OpenStreetMap 瓦片，否则整体向东南偏
 cur_lng_wgs, cur_lat_wgs = gcj02_to_wgs84(cur_lng, cur_lat)
 # 默认 zoom=14 看清家门口（家附近商圈级），有筛选时再用 fit_bounds 缩到筛选范围
-m = folium.Map(location=[cur_lat_wgs, cur_lng_wgs], zoom_start=14)
+# 瓦片源用高德而非默认 OSM：桌面端 OK，但手机/微信浏览器里 OSM 瓦片常被拦或丢包，
+# 导致「点都在但地图是灰底」。高德瓦片在国内移动场景下稳定且免费。
+m = folium.Map(
+    location=[cur_lat_wgs, cur_lng_wgs],
+    zoom_start=14,
+    tiles="https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
+    attr="© 高德地图",
+    subdomains="1234",
+)
 
 # 我的位置（红色大头针，独立于 cluster，置顶）
 folium.Marker(
